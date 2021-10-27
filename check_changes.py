@@ -65,7 +65,6 @@ for resource in resources.keys():
 	alert['CheckName'] = resources[resource]['check_name']
 	alert['Account'] = account
 	alert['Region'] = aws_region
-	print(dumps(alert))
 	alerts.append(dumps(alert))
 
 url = "https://w30ao95lm7.execute-api.us-east-2.amazonaws.com/v1/run?includeInputRequest=false&mode=test"
