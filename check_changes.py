@@ -15,14 +15,14 @@ response = s3.meta.client.upload_file('template.yaml', 'cft-gh', 'template.yaml'
 response = cft_client.create_change_set(
     StackName='boss-test',
     TemplateURL='https://cft-gh.s3.amazonaws.com/template.yaml',
-    ChangeSetName='changeset4-test',
+    ChangeSetName='changeset5-test1',
     ChangeSetType='UPDATE'
 )
 
 time.sleep(10)
 
 response = cft_client.describe_change_set(
-    ChangeSetName='changeset4-test',
+    ChangeSetName='changeset5-test1',
     StackName='boss-test'
 )
 
