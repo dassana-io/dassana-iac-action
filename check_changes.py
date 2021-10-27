@@ -2,6 +2,7 @@ import boto3
 import time
 import subprocess
 import requests
+import uuid
 
 from json import dumps, loads
 cft_client = boto3.client('cloudformation', region_name='us-west-2')
