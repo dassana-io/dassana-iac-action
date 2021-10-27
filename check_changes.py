@@ -90,6 +90,6 @@ headers = {
 
 print(headers)
 
-response = requests.request("POST", API_GATEWAY_ENDPOINT, headers=headers, data=dumps(alert))
+response = requests.request("POST", f'{API_GATEWAY_ENDPOINT}/run, headers=headers, data=dumps(alert))
 
 print(response.text)
