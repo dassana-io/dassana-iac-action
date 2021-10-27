@@ -49,14 +49,11 @@ for check in failed_checks:
 	violating_resource = check['resource'].split('.')[1]
 	resources[violating_resource]['check_id'] = check['check_id']
 	resources[violating_resource]['check_name'] = check['check_name']
-
-print(type(resources))
-print(resources)
-
+	
 account = boto3.client('sts').get_caller_identity().get('Account')
 
 alerts = []
-print(resources['HelloBucket']['physicalResourceId'])
+
 for resource in resources.keys():
 	alert = {}
 	alert['Source'] = 'checkov'
@@ -71,15 +68,9 @@ for resource in resources.keys():
 	print(dumps(alert))
 	alerts.append(dumps(alert))
 
-for alert in alerts:
-	print(alert)
-	requests.post('https://w30ao95lm7.execute-api.us-east-2.amazonaws.com/v1/run', data = alert, headers={"content-type":"application/json", "x-api-key":"FvxbZyNcHMafzHyQIhZUj7xjV5ciSoIo4drXwJ6q"})	
-
-
 url = "https://w30ao95lm7.execute-api.us-east-2.amazonaws.com/v1/run?includeInputRequest=false&mode=test"
 
 alert = {"Source": "checkov", "PhysicalResourceId": "boss-test-hellobucket-q99jlx0g35p4", "LogicalResourceId": "HelloBucket", "ResourceType": "AWS::S3::Bucket", "Changes": [{"Type": "Resource", "ResourceChange": {"Action": "Modify", "LogicalResourceId": "HelloBucket", "PhysicalResourceId": "boss-test-hellobucket-q99jlx0g35p4", "ResourceType": "AWS::S3::Bucket", "Replacement": "False", "Scope": ["Properties"], "Details": [{"Target": {"Attribute": "Properties", "Name": "AccessControl", "RequiresRecreation": "Never"}, "Evaluation": "Static", "ChangeSource": "DirectModification"}]}}], "CheckId": "CKV_AWS_56", "CheckName": "Ensure S3 bucket has 'restrict_public_bucket' enabled", "Account": "032584774331", "Region": "us-west-2"}
-
 
 headers = {
   'Accept': 'application/json, text/plain, */*',
