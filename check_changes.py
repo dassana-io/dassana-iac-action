@@ -11,18 +11,19 @@ aws_region = 'us-west-2'
 resources = {}
 
 response = s3.meta.client.upload_file('template.yaml', 'cft-gh', 'template.yaml')
+changeset_name = 'cft-' + str(uuid.uuid4()).replace('-', '')
 
 response = cft_client.create_change_set(
     StackName='boss-test',
     TemplateURL='https://cft-gh.s3.amazonaws.com/template.yaml',
-    ChangeSetName='changeset5-test1',
+    ChangeSetName=changeset_name,
     ChangeSetType='UPDATE'
 )
 
 time.sleep(10)
 
 response = cft_client.describe_change_set(
-    ChangeSetName='changeset5-test1',
+    ChangeSetName=changeset_name,
     StackName='boss-test'
 )
 
