@@ -88,6 +88,8 @@ headers = {
   'x-dassana-cache': 'false'
 }
 
+print(headers)
+
 response = requests.request("POST", API_GATEWAY_ENDPOINT, headers=headers, data=dumps(alert))
 
 print(response.text)
