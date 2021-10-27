@@ -60,7 +60,7 @@ for check in failed_checks:
 	resources[violating_resource]['check_name'] = check['check_name']
 	
 account = boto3.client('sts').get_caller_identity().get('Account')
-
+print(account)
 alerts = []
 
 for resource in resources.keys():
