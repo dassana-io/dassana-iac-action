@@ -76,7 +76,7 @@ for resource in resources.keys():
 	alert['Region'] = aws_region
 	alerts.append(dumps(alert))
 
-alert = {"Source": "checkov", "PhysicalResourceId": "boss-test-hellobucket-q99jlx0g35p4", "LogicalResourceId": "HelloBucket", "ResourceType": "AWS::S3::Bucket", "Changes": [{"Type": "Resource", "ResourceChange": {"Action": "Modify", "LogicalResourceId": "HelloBucket", "PhysicalResourceId": "boss-test-hellobucket-q99jlx0g35p4", "ResourceType": "AWS::S3::Bucket", "Replacement": "False", "Scope": ["Properties"], "Details": [{"Target": {"Attribute": "Properties", "Name": "AccessControl", "RequiresRecreation": "Never"}, "Evaluation": "Static", "ChangeSource": "DirectModification"}]}}], "CheckId": "CKV_AWS_56", "CheckName": "Ensure S3 bucket has 'restrict_public_bucket' enabled", "Account": "032584774331", "Region": "us-west-2"}
+alert = alerts[0] # for poc
 
 headers = {
   'Accept': 'application/json, text/plain, */*',
