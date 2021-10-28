@@ -46,8 +46,6 @@ for change in response['Changes']:
 	else:
 		resources[logical_resource] = {'changes': [change], 'physicalResourceId': change['ResourceChange']['PhysicalResourceId'], 'resourceType': change['ResourceChange']['ResourceType'], 'check_id': '', 'check_name': '', }
 
-x = {'ChangeSetName': 'changeset4-test', 'ChangeSetId': 'arn:aws:cloudformation:us-west-2:032584774331:changeSet/changeset4-test/014e648e-30da-4c18-91df-5319d319b88c', 'StackId': 'arn:aws:cloudformation:us-west-2:032584774331:stack/boss-test/56b4d250-2d2a-11ec-9922-0abb512a1f57', 'StackName': 'boss-test', 'CreationTime': '2021-10-26 05:14:17.403000+00:00', 'ExecutionStatus': 'AVAILABLE', 'Status': 'CREATE_COMPLETE', 'NotificationARNs': [], 'RollbackConfiguration': {}, 'Capabilities': [], 'Changes': [{'Type': 'Resource', 'ResourceChange': {'Action': 'Modify', 'LogicalResourceId': 'HelloBucket', 'PhysicalResourceId': 'boss-test-hellobucket-q99jlx0g35p4', 'ResourceType': 'AWS::S3::Bucket', 'Replacement': 'False', 'Scope': ['Properties'], 'Details': [{'Target': {'Attribute': 'Properties', 'Name': 'AccessControl', 'RequiresRecreation': 'Never'}, 'Evaluation': 'Static', 'ChangeSource': 'DirectModification'}]}}], 'IncludeNestedStacks': False, 'ResponseMetadata': {'RequestId': '37cadf22-147a-4b5a-8f48-1ab6e9dbb0d9', 'HTTPStatusCode': 200, 'HTTPHeaders': {'x-amzn-requestid': '37cadf22-147a-4b5a-8f48-1ab6e9dbb0d9', 'content-type': 'text/xml', 'content-length': '1793', 'date': 'Tue, 26 Oct 2021 05:15:20 GMT'}, 'RetryAttempts': 0}}
-
 y = subprocess.Popen(args = ["checkov", "-f", "template.yaml", "--output", "json"], stdout = subprocess.PIPE)
 
 a = loads(y.communicate()[0])
