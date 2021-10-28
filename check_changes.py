@@ -98,4 +98,4 @@ context = response.json()['dassana']
 data_string = f"<h3>These are the resources you are planning to change/create</h3></br>\n<strong>Review Dassana's output</strong></br>asdf - 123\n<details><summary>View resource context</summary>\n\n{context}"
 data = {'body':data_string}
             
-r = requests.post(url = pr_url, data = json.dumps(data), headers = headers)
+r = requests.post(url = pr_url, data = dumps(data), headers = headers)
