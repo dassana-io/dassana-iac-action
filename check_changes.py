@@ -92,4 +92,4 @@ print(headers)
 
 response = requests.request("POST", f'{API_GATEWAY_ENDPOINT}/run?includeInputRequest=false&mode=test', headers=headers, data=dumps(alert))
 
-print(response.text)
+print(response.json())
