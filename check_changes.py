@@ -92,7 +92,7 @@ print(headers)
 
 response = requests.request("POST", f'{API_GATEWAY_ENDPOINT}/run?includeInputRequest=false&mode=test', headers=headers, data=dumps(alert))
 
-print(response.json())
+print(response.json()['dassana'])
 
 pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
