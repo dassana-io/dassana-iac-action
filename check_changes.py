@@ -95,7 +95,7 @@ response = requests.request("POST", f'{API_GATEWAY_ENDPOINT}/run?includeInputReq
 pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
 context = response.json()['dassana']
-data_string = f"<h3>These are the resources you are planning to change/create</h3></br>\n<strong>MODIFY: S3 Bucket - \"boss-test-hellobucket-q99jlx0g35p4\"</strong></br></br><strong>General Context Risk</strong> - Not defined :woman_shrugging:</br><strong>Resource Context Risk</strong> - Low :white_circle:</br><strong>Policy Context Risk</strong> - High :red_circle:</br></br><details><summary>View full Dassana context</summary>\n\n\t{context}"
+data_string = f"<h3>These are the resources you are planning to change/create</h3></br>\n<strong>MODIFY: S3 Bucket - \"boss-test-hellobucket-q99jlx0g35p4\"</strong></br></br><strong>General Context Risk</strong> - Not defined :woman_shrugging:</br><strong>Resource Context Risk</strong> - Low :white_circle:</br><strong>Policy Context Risk</strong> - Low :white_circle:</br></br><details><summary>View full Dassana context</summary>\n\n\t{context}"
 data = {'body':data_string}
             
 r = requests.post(url = pr_url, data = dumps(data), headers = headers)
