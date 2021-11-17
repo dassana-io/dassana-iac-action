@@ -14,7 +14,10 @@ inputs:
     required: true
   template_file:
     description: 'Path to CFT file'
-    required: false
+    required: true
+    
+ 
+    
 
 branding:
   icon: 'arrow-left'
@@ -40,4 +43,5 @@ runs:
       - shell: bash
         run: |
           python ./check_changes.py
+
    
