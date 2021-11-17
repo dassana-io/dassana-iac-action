@@ -17,6 +17,8 @@ jobs:
           pip install boto3
           pip install requests
           pip install checkov
+          pip install pandas
+          pip install tabulate
       - name: Create and Analyze Change Set
         run: |
           python ./check_changes.py
