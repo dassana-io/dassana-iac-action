@@ -43,4 +43,6 @@ runs:
       - shell: bash
         run: |
           python ./check_changes.py
+         env:
+          INPUT_AWS_REGION: ${{ inputs.aws_region }}
         
