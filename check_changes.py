@@ -49,7 +49,7 @@ def create_analysis_table(decorated_alerts):
 
 	for alert in decorated_alerts:
 		alert = alert['dassana']
-
+		print(alert)
 		general_risk = ''
 		resource_risk = ''
 		policy_risk = ''
