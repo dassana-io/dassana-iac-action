@@ -77,11 +77,11 @@ def create_analysis_table(decorated_alerts):
 	print(types)
 	changes_df = pd.DataFrame({
 		"Resource": resources,
-		"Type": types,
 		"General Risk": general_risk,
 		"Resource Risk": resource_risk,
 		"Policy Risk": policy_risk
 	}).set_index("Resources")
+	print(changes_df)
 
 	return changes_df.to_markdown()
 
