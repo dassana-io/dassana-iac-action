@@ -17,10 +17,10 @@ GITHUB_PR = os.environ['GITHUB_PR']
 API_GATEWAY_ENDPOINT = os.environ['API_GATEWAY_ENDPOINT']
 API_KEY = os.environ['API_KEY']
 
-aws_region = os.environ['aws_region']
-s3_bucket_name = os.environ['bucket_name']
-cf_stack_name = os.environ['stack_name']
-cft_file_name = os.environ['template_file']
+aws_region = os.environ['INPUT_AWS_REGION']
+s3_bucket_name = os.environ['INPUT_BUCKET_NAME']
+cf_stack_name = os.environ['INPUT_STACK_NAME']
+cft_file_name = os.environ['INPUT_TEMPLATE_FILE']
 
 api_request_headers = {
   'Accept': 'application/json, text/plain, */*',
