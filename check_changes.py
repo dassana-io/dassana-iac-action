@@ -34,7 +34,6 @@ api_request_headers = {
 def post_findings_to_github(analysis_table):
 	pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 	headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
-	context = response.json()['dassana']
 	data_string = f"<h3>Dassana has detected changes in your tracked CloudFormation template</h3></br>Review the following to avoid service disruptions and/or security risks <hr/></br><details><summary>View Dassana's Change Analysis</summary></br>{analysis_table}</details>"
 	data = {'body':data_string}
 				
