@@ -35,7 +35,7 @@ def post_findings_to_github(analysis_table):
 	pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 	headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
 	data_string = f"""<h3>Dassana has detected changes in your tracked CloudFormation template</h3></br>Review the following to avoid service disruptions and/or security risks <hr/></br><details><summary>View Dassana's Change Analysis</summary></br>
-	
+
 {analysis_table}</details>"""
 	data = {'body':data_string}
 				
@@ -48,7 +48,6 @@ def create_analysis_table(decorated_alerts):
 	policy_risks = []
 
 	for alert in decorated_alerts:
-		print(alert)
 		alert = alert['dassana']
 
 		general_risk = ''
@@ -96,17 +95,18 @@ def create_alerts(resources):
 
 	#Need to support multi-alert per resource by looping through check-id's
 	for resource in resources.keys():
-		alert = {}
-		alert['Source'] = 'checkov'
-		alert['PhysicalResourceId'] = resources[resource]['physicalResourceId']
-		alert['LogicalResourceId'] = resource
-		alert['ResourceType'] = resources[resource]['resourceType']
-		alert['Changes'] = resources[resource]['changes']
-		alert['CheckId'] = resources[resource]['check_id']
-		alert['CheckName'] = resources[resource]['check_name']
-		alert['Account'] = account
-		alert['Region'] = aws_region
-		alerts.append(dumps(alert))
+		for i in range(0, len(resources[resource]['check_id'])):
+			alert = {}
+			alert['Source'] = 'checkov'
+			alert['PhysicalResourceId'] = resources[resource]['physicalResourceId']
+			alert['LogicalResourceId'] = resource
+			alert['ResourceType'] = resources[resource]['resourceType']
+			alert['Changes'] = resources[resource]['changes']
+			alert['CheckId'] = resources[resource]['check_id'][i]
+			alert['CheckName'] = resources[resource]['check_name'][i]
+			alert['Account'] = account
+			alert['Region'] = aws_region
+			alerts.append(dumps(alert))
 	
 	return alerts
 
@@ -121,8 +121,8 @@ def add_checkov_results(resources):
 	for check in failed_checks:
 		violating_resource = check['resource'].split('.')[1]
 		if violating_resource in resources:
-			resources[violating_resource]['check_id'] = check['check_id']
-			resources[violating_resource]['check_name'] = check['check_name']
+			resources[violating_resource]['check_id'].append(check['check_id'])
+			resources[violating_resource]['check_name'].append(check['check_name'])
 
 def get_modified_resources(change_set):
 	resources = {}
@@ -140,8 +140,8 @@ def get_modified_resources(change_set):
 					'changes': [change], 
 					'physicalResourceId': '', 
 					'resourceType': change['ResourceChange']['ResourceType'], 
-					'check_id': '', 
-					'check_name': ''
+					'check_id': [], 
+					'check_name': []
 				}
 
 			if 'PhysicalResourceId' in change['ResourceChange']:
