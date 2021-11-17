@@ -60,7 +60,7 @@ def create_analysis_table(decorated_alerts):
 			general_risk = alert['general-context']['risk']['riskValue']
 		
 		if 'risk' in alert['resource-context']:
-			policy_risk = alert['resource-context']['risk']['riskValue']
+			resource_risk = alert['resource-context']['risk']['riskValue']
 		
 		if 'risk' in alert['policy-context']:
 			policy_risk = alert['policy-context']['risk']['riskValue']
