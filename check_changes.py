@@ -43,6 +43,7 @@ def post_findings_to_github(analysis_table):
 
 def create_analysis_table(decorated_alerts):
 	resources = []
+	types = []
 	general_risks = []
 	resource_risks = []
 	policy_risks = []
@@ -50,11 +51,12 @@ def create_analysis_table(decorated_alerts):
 	for alert in decorated_alerts:
 		alert = alert['dassana']
 
-		general_risk = 'none'
-		resource_risk = 'none'
-		policy_risk = 'none'
+		general_risk = ''
+		resource_risk = ''
+		policy_risk = ''
 
 		resource_id = alert['normalize']['output']['resourceId']
+		resource_type = f'{alert['normalize']['output']['service']}:{alert['normalize']['output']['resourceType']}'
 
 		if 'risk' in alert['general-context']:
 			general_risk = alert['general-context']['risk']['riskValue']
@@ -66,12 +68,16 @@ def create_analysis_table(decorated_alerts):
 			policy_risk = alert['policy-context']['risk']['riskValue']
 
 		resources.append(resource_id)
+		types.append(resource_type)
 		general_risks.append(general_risk)
 		resource_risks.append(resource_risk)
 		policy_risks.append(policy_risk)
+		
+		
 
 	changes_df = pd.DataFrame({
-		"Resources": resources,
+		"Resource": resources,
+		"Type": types,
 		"General Risk": general_risk,
 		"Resource Risk": resource_risk,
 		"Policy Risk": policy_risk
