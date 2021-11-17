@@ -1,0 +1,13 @@
+# Deploys a single S3 Bucket
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  HelloBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+  HelloBucket2:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+
