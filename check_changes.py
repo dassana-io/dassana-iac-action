@@ -9,6 +9,8 @@ import pandas as pd
 
 from json import dumps, loads
 
+print(os.environ)
+
 GITHUB_REPO = os.environ['GITHUB_REPOSITORY']
 GITHUB_SHA = os.environ['GITHUB_SHA']
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
