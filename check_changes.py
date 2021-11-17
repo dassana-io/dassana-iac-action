@@ -74,7 +74,7 @@ def create_analysis_table(decorated_alerts):
 		policy_risks.append(policy_risk)
 		
 		
-
+	print(types)
 	changes_df = pd.DataFrame({
 		"Resource": resources,
 		"Type": types,
