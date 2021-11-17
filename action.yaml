@@ -16,9 +16,6 @@ inputs:
     description: 'Path to CFT file'
     required: true
     
- 
-    
-
 branding:
   icon: 'arrow-left'
   color: 'gray-dark'
