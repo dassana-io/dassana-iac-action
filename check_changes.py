@@ -56,7 +56,8 @@ def create_analysis_table(decorated_alerts):
 		policy_risk = ''
 
 		resource_id = alert['normalize']['output']['resourceId']
-		resource_type = f'{alert['normalize']['output']['service']}:{alert['normalize']['output']['resourceType']}'
+		service = 
+		resource_type = alert['normalize']['output']['service'] + ':' + alert['normalize']['output']['resourceType']
 
 		if 'risk' in alert['general-context']:
 			general_risk = alert['general-context']['risk']['riskValue']
