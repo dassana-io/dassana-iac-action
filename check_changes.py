@@ -9,8 +9,6 @@ import pandas as pd
 
 from json import dumps, loads
 
-print(os.environ)
-
 GITHUB_REPO = os.environ['GITHUB_REPOSITORY']
 GITHUB_SHA = os.environ['GITHUB_SHA']
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
@@ -24,16 +22,10 @@ s3_bucket_name = os.environ['INPUT_BUCKET_NAME']
 cf_stack_name = os.environ['INPUT_STACK_NAME']
 cft_file_name = os.environ['INPUT_TEMPLATE_FILE']
 
-api_request_headers = {
-  'Accept': 'application/json, text/plain, */*',
-  'Content-Type': 'application/json',
-  'Origin': 'https://editor.dassana.io',
-  'Referer': 'https://editor.dassana.io/',
-  'x-api-key': API_KEY,
-  'x-dassana-cache': 'false'
-}
-
 def post_findings_to_github(analysis_table):
+	"""
+	Posts Dassana findings in a Github comment on the PR
+	"""
 	pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 	headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
 	data_string = f"""<h3>Dassana has detected changes in your tracked CloudFormation template</h3></br>Review the following to avoid service disruptions and/or security risks <hr/></br><details><summary>View Dassana's Change Analysis</summary></br>
@@ -44,6 +36,9 @@ def post_findings_to_github(analysis_table):
 	r = requests.post(url = pr_url, data = dumps(data), headers = headers)
 
 def create_analysis_table(decorated_alerts):
+	"""
+	Turns Dassana-enriched output into a markdown table
+	"""
 	resources = []
 	types = []
 	policies = []
@@ -91,7 +86,18 @@ def create_analysis_table(decorated_alerts):
 
 
 def decorate_alerts(alerts):
+	"""
+	Decorates alerts with context by calling Dassana
+	"""
 	decorated_alerts = []
+	api_request_headers = {
+	  'Accept': 'application/json, text/plain, */*',
+	  'Content-Type': 'application/json',
+	  'Origin': 'https://editor.dassana.io',
+	  'Referer': 'https://editor.dassana.io/',
+	  'x-api-key': API_KEY,
+	  'x-dassana-cache': 'false'
+	}
 
 	for alert in alerts:
 		response = requests.request('POST', url=f'{API_GATEWAY_ENDPOINT}/run?includeInputRequest=false&mode=test', headers=api_request_headers, data=dumps(alert))
@@ -100,10 +106,12 @@ def decorate_alerts(alerts):
 	return decorated_alerts
 	
 def create_alerts(resources):
+	"""
+	Creates individual alerts to be ingested by Dassana normalizer
+	"""
 	account = boto3.client('sts').get_caller_identity().get('Account')
 	alerts = []
 
-	#Need to support multi-alert per resource by looping through check-id's
 	for resource in resources.keys():
 		for i in range(0, len(resources[resource]['check_id'])):
 			alert = {}
@@ -122,6 +130,9 @@ def create_alerts(resources):
 
 
 def add_checkov_results(resources):
+	"""
+	Runs checkov and associates violations to resources
+	"""
 	checkov_scan = subprocess.Popen(args = ["checkov", "-f", cft_file_name, "--output", "json"], stdout = subprocess.PIPE)
 
 	checkov_results = loads(checkov_scan.communicate()[0])
@@ -135,6 +146,9 @@ def add_checkov_results(resources):
 			resources[violating_resource]['check_name'].append(check['check_name'])
 
 def get_modified_resources(change_set):
+	"""
+	Returns all resources that stand to be modified by change-set
+	"""
 	resources = {}
 
 	for change in change_set['Changes']:
@@ -179,12 +193,12 @@ def create_change_set():
 	waiter = cft_client.get_waiter('change_set_create_complete')
 	
 	waiter.wait(
-    ChangeSetName=changeset_name,
-    StackName=cf_stack_name,
-    WaiterConfig={
-        'Delay': 5,
-        'MaxAttempts': 50
-    	}
+    		ChangeSetName=changeset_name,
+    		StackName=cf_stack_name,
+    		WaiterConfig={
+       		 'Delay': 5,
+       		 'MaxAttempts': 50
+    		}
 	)
 
 	response = cft_client.describe_change_set(
