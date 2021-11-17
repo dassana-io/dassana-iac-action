@@ -18,5 +18,13 @@ jobs:
           bucket_name: 'cft-gh'
           stack_name: 'boss-test'
           template_file: 'template.yaml'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR: ${{ github.event.number }}
+          AWS_DEFAULT_REGION: us-east-2
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          API_GATEWAY_ENDPOINT: ${{ secrets.API_GATEWAY_ENDPOINT }}
+          API_KEY: ${{ secrets.API_KEY }}
 
           
