@@ -45,4 +45,7 @@ runs:
           python ./check_changes.py
         env:
           INPUT_AWS_REGION: ${{ inputs.aws_region }}
+          INPUT_BUCKET_NAME: ${{ inputs.bucket_name }}
+          INPUT_STACK_NAME : ${{ inputs.stack_name }}
+          INPUT_TEMPLATE_FILE : ${{ inputs.template_file }}
         
