@@ -13,14 +13,15 @@ GITHUB_REPO = os.environ['GITHUB_REPOSITORY']
 GITHUB_SHA = os.environ['GITHUB_SHA']
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
 GITHUB_PR = os.environ['GITHUB_PR']
-#Get below from env vars
-aws_region = 'us-west-2' # Make this configurable
-s3_bucket_name = 'cft-gh'
-cf_stack_name = 'boss-test'
-cft_file_name = 'template.yaml'
 
-API_GATEWAY_ENDPOINT = 'https://yzl8a8ro0a.execute-api.us-east-2.amazonaws.com/v1'
-API_KEY = 'rAS4YiYW6s4CyO2h8OJD13RtsiTcRfnB78RZfs6T'
+API_GATEWAY_ENDPOINT = os.environ['API_GATEWAY_ENDPOINT']
+API_KEY = os.environ['API_KEY']
+
+aws_region = os.environ['aws_region']
+s3_bucket_name = os.environ['bucket_name']
+cf_stack_name = os.environ['stack_name']
+cft_file_name = os.environ['template_file']
+
 api_request_headers = {
   'Accept': 'application/json, text/plain, */*',
   'Content-Type': 'application/json',
