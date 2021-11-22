@@ -22,6 +22,15 @@ s3_bucket_name = os.environ['INPUT_BUCKET_NAME']
 cf_stack_name = os.environ['INPUT_STACK_NAME']
 cft_file_name = os.environ['INPUT_TEMPLATE_FILE']
 
+api_request_headers = {
+	  'Accept': 'application/json, text/plain, */*',
+	  'Content-Type': 'application/json',
+	  'Origin': 'https://editor.dassana.io',
+	  'Referer': 'https://editor.dassana.io/',
+	  'x-api-key': API_KEY,
+	  'x-dassana-cache': 'false'
+	}
+
 def post_findings_to_github(analysis_table):
 	"""
 	Posts Dassana findings in a Github comment on the PR
@@ -90,14 +99,6 @@ def decorate_alerts(alerts):
 	Decorates alerts with context by calling Dassana
 	"""
 	decorated_alerts = []
-	api_request_headers = {
-	  'Accept': 'application/json, text/plain, */*',
-	  'Content-Type': 'application/json',
-	  'Origin': 'https://editor.dassana.io',
-	  'Referer': 'https://editor.dassana.io/',
-	  'x-api-key': API_KEY,
-	  'x-dassana-cache': 'false'
-	}
 
 	for alert in alerts:
 		response = requests.request('POST', url=f'{API_GATEWAY_ENDPOINT}/run?includeInputRequest=false&mode=test', headers=api_request_headers, data=dumps(alert))
