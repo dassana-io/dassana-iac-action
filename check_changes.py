@@ -43,6 +43,7 @@ def post_findings_to_github(analysis_table):
 	r = requests.post(url = pr_url, data = dumps(data), headers = headers)
 
 def create_analysis_table(decorated_alerts):
+	print(decorated_alerts)
 	resources = []
 	types = []
 	policies = []
