@@ -1,17 +1,17 @@
 on: [pull_request]
 
 jobs:
-  dassana_job:
+  dassana-job:
     runs-on: ubuntu-latest
-    name: DassanaSecurityCheck
+    name: dassana-action
     steps:
-      - name: Checkout
+      - name: Checkout Repo
         uses: actions/checkout@v2
       - name: python-test
         uses: actions/setup-python@v2.2.2
         with: 
           python-version: 3.8
-      - name: Dassana IaC 
+      - name: Run Dassana IaC Action
         uses: kloading/CloudContext@main
         with:
           aws_region: 'us-west-2'
