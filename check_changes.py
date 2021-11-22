@@ -125,7 +125,7 @@ def create_alerts(resources):
 			alert['Account'] = account
 			alert['Region'] = aws_region
 			alerts.append(dumps(alert))
-	for alert in alerts
+	for alert in alerts:
 		print(alert)
 	return alerts
 
