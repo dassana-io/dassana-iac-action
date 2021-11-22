@@ -67,13 +67,13 @@ def create_analysis_table(decorated_alerts):
 		vendor_id = alert['normalize']['output']['vendorId']
 		alert_id = alert['normalize']['output']['alertId']
 
-		if 'risk' in alert['general-context'] and alert['general-context']['risk'] != '':
+		if 'risk' in alert['general-context'] and alert['general-context']['risk']['riskValue'] != '':
 			general_risk = alert['general-context']['risk']['riskValue']
 		
-		if 'risk' in alert['resource-context'] and alert['resource-context']['risk'] != '':
+		if 'risk' in alert['resource-context'] and alert['resource-context']['risk']['riskValue'] != '':
 			resource_risk = alert['resource-context']['risk']['riskValue']
 		
-		if 'risk' in alert['policy-context'] and alert['policy-context']['risk'] != '':
+		if 'risk' in alert['policy-context'] and alert['policy-context']['risk']['riskValue'] != '':
 			policy_risk = alert['policy-context']['risk']['riskValue']
 		
 		context_url = f'[View]({base_editor_url}/?alertId={alert_id}&vendorId={vendor_id})'
