@@ -14,27 +14,25 @@ GITHUB_SHA = os.environ['GITHUB_SHA']
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
 GITHUB_PR = os.environ['GITHUB_PR']
 
-API_GATEWAY_ENDPOINT = os.environ['API_GATEWAY_ENDPOINT']
-API_KEY = os.environ['API_KEY']
+API_GATEWAY_ENDPOINT = 'https://yzl8a8ro0a.execute-api.us-east-2.amazonaws.com/v1'
+API_KEY = 'rAS4YiYW6s4CyO2h8OJD13RtsiTcRfnB78RZfs6T'
 
-aws_region = os.environ['INPUT_AWS_REGION']
-s3_bucket_name = os.environ['INPUT_BUCKET_NAME']
-cf_stack_name = os.environ['INPUT_STACK_NAME']
-cft_file_name = os.environ['INPUT_TEMPLATE_FILE']
+aws_region = 'us-west-2'
+s3_bucket_name = 'cft-gh'
+cf_stack_name = 'boss-test'
+cft_file_name = 'template.yaml'
 
 api_request_headers = {
-	  'Accept': 'application/json, text/plain, */*',
-	  'Content-Type': 'application/json',
-	  'Origin': 'https://editor.dassana.io',
-	  'Referer': 'https://editor.dassana.io/',
-	  'x-api-key': API_KEY,
-	  'x-dassana-cache': 'false'
-	}
+  'Accept': 'application/json, text/plain, */*',
+  'Content-Type': 'application/json',
+  'Origin': 'https://editor.dassana.io',
+  'Referer': 'https://editor.dassana.io/',
+  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15',
+  'x-api-key': API_KEY,
+  'x-dassana-cache': 'false'
+}
 
 def post_findings_to_github(analysis_table):
-	"""
-	Posts Dassana findings in a Github comment on the PR
-	"""
 	pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 	headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
 	data_string = f"""<h3>Dassana has detected changes in your tracked CloudFormation template</h3></br>Review the following to avoid service disruptions and/or security risks <hr/></br><details><summary>View Dassana's Change Analysis</summary></br>
@@ -45,15 +43,15 @@ def post_findings_to_github(analysis_table):
 	r = requests.post(url = pr_url, data = dumps(data), headers = headers)
 
 def create_analysis_table(decorated_alerts):
-	"""
-	Turns Dassana-enriched output into a markdown table
-	"""
 	resources = []
 	types = []
 	policies = []
 	general_risks = []
 	resource_risks = []
 	policy_risks = []
+	context_urls = []
+
+	base_editor_url = 'https://deploy-preview-146--dassana-web-authoring.netlify.app'
 
 	for alert in decorated_alerts:
 		alert = alert['dassana']
@@ -65,6 +63,8 @@ def create_analysis_table(decorated_alerts):
 		resource_id = alert['normalize']['output']['resourceId']
 		resource_type = alert['normalize']['output']['service'] + ':' + alert['normalize']['output']['resourceType']
 		policy_id = alert['normalize']['output']['vendorPolicy']
+		vendor_id = alert['normalize']['output']['vendorId']
+		alert_id = alert['normalize']['output']['alertId']
 
 		if 'risk' in alert['general-context']:
 			general_risk = alert['general-context']['risk']['riskValue']
@@ -74,6 +74,8 @@ def create_analysis_table(decorated_alerts):
 		
 		if 'risk' in alert['policy-context']:
 			policy_risk = alert['policy-context']['risk']['riskValue']
+		
+		context_url = f'[View]({base_editor_url}/?alertId={alert_id}&vendorId={vendor_id})'
 
 		resources.append(resource_id)
 		types.append(resource_type)
@@ -81,6 +83,8 @@ def create_analysis_table(decorated_alerts):
 		general_risks.append(general_risk)
 		resource_risks.append(resource_risk)
 		policy_risks.append(policy_risk)
+
+		context_urls.append(context_url)
 		
 	changes_df = pd.DataFrame({
 		"Resource": resources,
@@ -88,16 +92,14 @@ def create_analysis_table(decorated_alerts):
 		"Policy": policies,
 		"General Risk": general_risk,
 		"Resource Risk": resource_risk,
-		"Policy Risk": policy_risk
+		"Policy Risk": policy_risk,
+		"Context": context_urls
 	}).set_index("Resource")
 
 	return changes_df.to_markdown()
 
 
 def decorate_alerts(alerts):
-	"""
-	Decorates alerts with context by calling Dassana
-	"""
 	decorated_alerts = []
 
 	for alert in alerts:
@@ -107,9 +109,6 @@ def decorate_alerts(alerts):
 	return decorated_alerts
 	
 def create_alerts(resources):
-	"""
-	Creates individual alerts to be ingested by Dassana normalizer
-	"""
 	account = boto3.client('sts').get_caller_identity().get('Account')
 	alerts = []
 
@@ -126,15 +125,11 @@ def create_alerts(resources):
 			alert['Account'] = account
 			alert['Region'] = aws_region
 			alerts.append(dumps(alert))
-	for alert in alerts:
-		print(alert)
+	
 	return alerts
 
 
 def add_checkov_results(resources):
-	"""
-	Runs checkov and associates violations to resources
-	"""
 	checkov_scan = subprocess.Popen(args = ["checkov", "-f", cft_file_name, "--output", "json"], stdout = subprocess.PIPE)
 
 	checkov_results = loads(checkov_scan.communicate()[0])
@@ -148,9 +143,6 @@ def add_checkov_results(resources):
 			resources[violating_resource]['check_name'].append(check['check_name'])
 
 def get_modified_resources(change_set):
-	"""
-	Returns all resources that stand to be modified by change-set
-	"""
 	resources = {}
 
 	for change in change_set['Changes']:
@@ -195,12 +187,12 @@ def create_change_set():
 	waiter = cft_client.get_waiter('change_set_create_complete')
 	
 	waiter.wait(
-    		ChangeSetName=changeset_name,
-    		StackName=cf_stack_name,
-    		WaiterConfig={
-       		 'Delay': 5,
-       		 'MaxAttempts': 50
-    		}
+    	ChangeSetName=changeset_name,
+    	StackName=cf_stack_name,
+    	WaiterConfig={
+        	'Delay': 5,
+        	'MaxAttempts': 50
+    	}
 	)
 
 	response = cft_client.describe_change_set(
