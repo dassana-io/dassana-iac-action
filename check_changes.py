@@ -62,6 +62,7 @@ def create_analysis_table(decorated_alerts):
 	resource_risks = []
 	policy_risks = []
 	context_urls = []
+	alert_messages = []
 
 	base_editor_url = 'https://deploy-preview-146--dassana-web-authoring.netlify.app'
 
@@ -77,6 +78,8 @@ def create_analysis_table(decorated_alerts):
 		policy_id = alert['normalize']['output']['vendorPolicy']
 		vendor_id = alert['normalize']['output']['vendorId']
 		alert_id = alert['normalize']['output']['alertId']
+		
+		alert_message = 'Ensure S3 bucket has 'restrict_public_bucket' enabled'
 
 		if 'risk' in alert['general-context'] and alert['general-context']['risk']['riskValue'] != '':
 			general_risk = alert['general-context']['risk']['riskValue']
@@ -100,10 +103,12 @@ def create_analysis_table(decorated_alerts):
 		policy_risks.append(policy_risk)
 
 		context_urls.append(context_url)
+		alert_messages.append(alert_message)
 		
 	changes_df = pd.DataFrame({
 		"Resource": resources,
 		"Type": types,
+		"Violation": alert_message,
 		"Policy": policies,
 		"General Risk": general_risk,
 		"Resource Risk": resource_risk,
