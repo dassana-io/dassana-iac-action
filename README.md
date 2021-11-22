@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-      - name: python-test
+      - name: Install Python
         uses: actions/setup-python@v2.2.2
         with: 
           python-version: 3.8
