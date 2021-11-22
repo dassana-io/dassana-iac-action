@@ -1,5 +1,5 @@
 # Dassana IaC
-Supercharge your IaC checks using [Dassana](https://github.com/dassana-io/dassana) to get to production faster
+Supercharge your DevSecOps teams using [Dassana](https://github.com/dassana-io/dassana) to get to production faster
 
 ## Example usage
 ```yaml
