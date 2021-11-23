@@ -42,7 +42,7 @@ def post_findings_to_github(analysis_table):
 				
 	r = requests.post(url = pr_url, data = dumps(data), headers = headers)
 
-def create_analysis_table(decorated_alerts, resources):
+def create_analysis_table(decorated_alerts, modified_resources):
 	resources = []
 	types = []
 	policy_names = []
@@ -53,7 +53,6 @@ def create_analysis_table(decorated_alerts, resources):
 	context_urls = []
 
 	base_editor_url = 'https://deploy-preview-146--dassana-web-authoring.netlify.app'
-	print(resources)
 	for alert in decorated_alerts:
 		alert = alert['dassana']
 
@@ -64,7 +63,7 @@ def create_analysis_table(decorated_alerts, resources):
 		resource_id = alert['normalize']['output']['resourceId']
 		resource_type = alert['normalize']['output']['service'] + ':' + alert['normalize']['output']['resourceType']
 		policy_id = alert['normalize']['output']['vendorPolicy']
-		policy_name = resources[resource_id]['check_name']
+		policy_name = modified_resources[resource_id]['check_name']
 		vendor_id = alert['normalize']['output']['vendorId']
 		alert_id = alert['normalize']['output']['alertId']
 
