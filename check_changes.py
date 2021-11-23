@@ -49,6 +49,7 @@ def post_findings_to_github(modified_analysis_table, created_analysis_table):
 	data_string = f"""<h3>Dassana has detected changes in your tracked CloudFormation template</h3></br>Review the following to avoid service disruptions and/or security risks <hr/></br><details><summary>View Dassana's Change Analysis</summary></br>
 
 {modified_analysis_table}</details>
+
 </br><details><summary>View Dassana's Create Analysis</summary></br>
 
 {created_analysis_table}</details>"""
@@ -71,8 +72,8 @@ def get_created_analysis_table(created_resources):
 			resource_type = resource_type.split('AWS::')[1]
 
 			types.append(resource_type)
-			policy_names.append(created_resources[r]['check_name'])
-			policies.append(created_resources[r]['check_id'])
+			policy_names.append(created_resources[r]['check_name'][i])
+			policies.append(created_resources[r]['check_id'][i])
 	
 	changes_df = pd.DataFrame({
 		"Resource": resources,
