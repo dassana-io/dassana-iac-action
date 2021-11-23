@@ -53,7 +53,7 @@ def create_analysis_table(decorated_alerts, resources):
 	context_urls = []
 
 	base_editor_url = 'https://deploy-preview-146--dassana-web-authoring.netlify.app'
-
+	print(resources)
 	for alert in decorated_alerts:
 		alert = alert['dassana']
 
