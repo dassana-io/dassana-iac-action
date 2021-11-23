@@ -154,7 +154,7 @@ def create_alerts(resources):
 	return alerts
 
 
-def add_checkov_results(resources):
+def add_checkov_results(modified_resources, created_resources):
 	checkov_scan = subprocess.Popen(args = ["checkov", "-f", cft_file_name, "--output", "json"], stdout = subprocess.PIPE)
 
 	checkov_results = loads(checkov_scan.communicate()[0])
@@ -163,11 +163,14 @@ def add_checkov_results(resources):
 
 	for check in failed_checks:
 		violating_resource = check['resource'].split('.')[1]
-		if violating_resource in resources:
-			resources[violating_resource]['check_id'].append(check['check_id'])
-			resources[violating_resource]['check_name'].append(check['check_name'])
+		if violating_resource in modified_resources:
+			modified_resources[violating_resource]['check_id'].append(check['check_id'])
+			modified_resources[violating_resource]['check_name'].append(check['check_name'])
+		elif violating_resource in created_resources:
+			created_resources[violating_resource]['check_id'].append(check['check_id'])
+			created_resources[violating_resource]['check_name'].append(check['check_name'])
 
-def get_modified_resources(change_set):
+def get_resources(change_set):
 	modified_resources = {}
 	created_resources = {}
 
@@ -201,7 +204,7 @@ def get_modified_resources(change_set):
 						'check_name': [],
 					}
 
-	return modified_resources
+	return modified_resources, created_resources
 
 def create_change_set():
 	"""
@@ -252,9 +255,9 @@ def main():
 	
 	change_set = create_change_set()
 	
-	modified_resources = get_modified_resources(change_set)
-	add_checkov_results(modified_resources)
-
+	modified_resources, created_resources = get_resources(change_set)
+	add_checkov_results(modified_resources, created_resources)
+	print(created_resources)
 	alerts = create_alerts(modified_resources)
 	decorated_alerts = decorate_alerts(alerts)
 	
