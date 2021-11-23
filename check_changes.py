@@ -78,7 +78,7 @@ def get_created_analysis_table(created_resources):
 	changes_df = pd.DataFrame({
 		"Resource": resources,
 		"Type": types,
-		"Policy Name": policy_names,
+		"Policy Violation": policy_names,
 		"Policy ID": policies
 	}).set_index("Resource")
 
@@ -145,7 +145,7 @@ def get_modified_analysis_table(decorated_alerts, modified_resources):
 	changes_df = pd.DataFrame({
 		"Resource": resources,
 		"Type": types,
-		"Policy Name": policy_names,
+		"Policy Violation": policy_names,
 		"Policy ID": policies,
 		"General Risk": general_risk,
 		"Resource Risk": resource_risk,
@@ -245,16 +245,23 @@ def create_change_set():
 	cft_client = boto3.client('cloudformation', region_name=aws_region)
 	s3 = boto3.resource('s3', region_name=aws_region)
 
-	response = s3.meta.client.upload_file(cft_file_name, s3_bucket_name, cft_file_name)
+	try:
+		response = s3.meta.client.upload_file(cft_file_name, s3_bucket_name, cft_file_name)
+	except ClientError as e:
+		print(f'An error occured while attempting to upload your Cloudformation template to S3. Ensure an s3 bucket named {s3_bucket_name} exists and the role has sufficient permissions - {e}')
+
 	changeset_name = 'cft-' + str(uuid.uuid4()).replace('-', '')
 
-	response = cft_client.create_change_set(
-		StackName=cf_stack_name, 
-		TemplateURL=f'https://{s3_bucket_name}.s3.amazonaws.com/{cft_file_name}',
-		ChangeSetName=changeset_name,
-		ChangeSetType='UPDATE'
-	)
-
+	try:
+		response = cft_client.create_change_set(
+			StackName=cf_stack_name, 
+			TemplateURL=f'https://{s3_bucket_name}.s3.amazonaws.com/{cft_file_name}',
+			ChangeSetName=changeset_name,
+			ChangeSetType='UPDATE'
+		)
+	except ClientError as e:
+		print(f'An error occured while attempting to create a changeset. Ensure a stack named {cf_stack_name} exists and the role has sufficient permissions - {e}')
+	
 	waiter = cft_client.get_waiter('change_set_create_complete')
 	
 	waiter.wait(
@@ -266,11 +273,14 @@ def create_change_set():
     	}
 	)
 
-	response = cft_client.describe_change_set(
-		ChangeSetName=changeset_name,
-		StackName=cf_stack_name
-	)
-
+	try:
+		response = cft_client.describe_change_set(
+			ChangeSetName=changeset_name,
+			StackName=cf_stack_name
+		)
+	except ClientError as e:
+		print(f'An error occured while attempting to describe a changeset. Ensure a stack named {cf_stack_name} exists and the role has sufficient permissions - {e}')
+	
 	response = loads(dumps(response, default=str))
 	return response
 
@@ -289,13 +299,13 @@ def main():
 	
 	modified_resources, created_resources = get_resources(change_set)
 	add_checkov_results(modified_resources, created_resources)
-	print(created_resources)
+	
 	alerts = create_alerts(modified_resources)
 	decorated_alerts = decorate_alerts(alerts)
 	
 	modified_analysis_table = get_modified_analysis_table(decorated_alerts, modified_resources)
 	created_analysis_table = get_created_analysis_table(created_resources)
-	print(created_analysis_table)
+	
 	post_findings_to_github(modified_analysis_table, created_analysis_table)
 
 if __name__ == "__main__":
