@@ -43,17 +43,48 @@ def stylize_risk(risk):
 		risk = ' -'
 	return risk
 
-def post_findings_to_github(analysis_table):
+def post_findings_to_github(modified_analysis_table, created_analysis_table):
 	pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 	headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
 	data_string = f"""<h3>Dassana has detected changes in your tracked CloudFormation template</h3></br>Review the following to avoid service disruptions and/or security risks <hr/></br><details><summary>View Dassana's Change Analysis</summary></br>
 
-{analysis_table}</details>"""
+{modified_analysis_table}</details>
+</br><details><summary>View Dassana's Create Analysis</summary></br>
+
+{created_analysis_table}</details>"""
+
 	data = {'body':data_string}
 				
 	r = requests.post(url = pr_url, data = dumps(data), headers = headers)
 
-def create_analysis_table(decorated_alerts, modified_resources):
+def get_created_analysis_table(created_resources):
+	resources = []
+	types = []
+	policy_names = []
+	policies = []
+
+	for r in created_resources:
+		for i in range(len(created_resources[r]['check_id'])):
+			resources.append(r)
+
+			resource_type = created_resources[r]['resourceType']
+			resource_type = resource_type.split('AWS::')[1]
+
+			types.append(resource_type)
+			policy_names.append(created_resources[r]['check_name'])
+			policies.append(created_resources[r]['check_id'])
+	
+	changes_df = pd.DataFrame({
+		"Resource": resources,
+		"Type": types,
+		"Policy Name": policy_names,
+		"Policy ID": policies
+	}).set_index("Resource")
+
+	return changes_df.to_markdown()
+
+
+def get_modified_analysis_table(decorated_alerts, modified_resources):
 	resources = []
 	types = []
 	policy_names = []
@@ -261,9 +292,10 @@ def main():
 	alerts = create_alerts(modified_resources)
 	decorated_alerts = decorate_alerts(alerts)
 	
-	analysis_table = create_analysis_table(decorated_alerts, modified_resources)
-
-	post_findings_to_github(analysis_table)
+	modified_analysis_table = get_modified_analysis_table(decorated_alerts, modified_resources)
+	created_analysis_table = get_created_analysis_table(created_resources)
+	print(created_analysis_table)
+	post_findings_to_github(modified_analysis_table, created_analysis_table)
 
 if __name__ == "__main__":
 	main()
