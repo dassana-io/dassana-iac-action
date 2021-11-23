@@ -72,7 +72,7 @@ def create_analysis_table(decorated_alerts, modified_resources):
 				check_index = 0
 				for check in v['check_id']:
 					if check == policy_id:
-						policy_name == v['check_name'][check_index]
+						policy_name = v['check_name'][check_index]
 					check_index += 1
 
 		if 'risk' in alert['general-context']:
