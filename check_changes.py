@@ -113,7 +113,7 @@ def create_analysis_table(decorated_alerts, modified_resources):
 		"Resource": resources,
 		"Type": types,
 		"Policy Name": policy_names,
-		"Policy": policies,
+		"Policy ID": policies,
 		"General Risk": general_risk,
 		"Resource Risk": resource_risk,
 		"Policy Risk": policy_risk,
