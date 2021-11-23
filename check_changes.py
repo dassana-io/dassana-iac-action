@@ -32,6 +32,17 @@ api_request_headers = {
   'x-dassana-cache': 'false'
 }
 
+def stylize_risk(risk):
+	if risk == 'high':
+		risk = 'High :red_circle:'
+	elif risk == 'medium':
+		risk = 'Medium :yellow_circle:'
+	elif risk == 'low':
+		risk = 'Low :white_circle:'
+	else:
+		risk = ' -'
+	return risk
+
 def post_findings_to_github(analysis_table):
 	pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 	headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
@@ -77,13 +88,16 @@ def create_analysis_table(decorated_alerts, modified_resources):
 
 		if 'risk' in alert['general-context']:
 			general_risk = alert['general-context']['risk']['riskValue']
+			general_risk = stylize_risk(stylize_risk)
 		
 		if 'risk' in alert['resource-context']:
 			resource_risk = alert['resource-context']['risk']['riskValue']
+			resource_risk = stylize_risk(resource_risk)
 		
 		if 'risk' in alert['policy-context']:
 			policy_risk = alert['policy-context']['risk']['riskValue']
-		
+			policy_risk = stylize_risk(policy_risk)
+
 		context_url = f'[View]({base_editor_url}/?alertId={alert_id}&vendorId={vendor_id})'
 
 		resources.append(resource_id)
