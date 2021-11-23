@@ -32,6 +32,7 @@ api_request_headers = {
   'x-dassana-cache': 'false'
 }
 
+
 def stylize_risk(risk):
 	if risk == 'high':
 		risk = 'High :red_circle:'
