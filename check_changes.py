@@ -50,7 +50,7 @@ def post_findings_to_github(modified_analysis_table, created_analysis_table):
 
 {modified_analysis_table}</details>
 
-</br><details><summary>View Dassana's Create Analysis</summary></br>
+</br><details><summary>View Checkov's analysis of created resources</summary></br>
 
 {created_analysis_table}</details>"""
 
