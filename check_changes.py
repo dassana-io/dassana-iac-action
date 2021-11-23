@@ -63,9 +63,17 @@ def create_analysis_table(decorated_alerts, modified_resources):
 		resource_id = alert['normalize']['output']['resourceId']
 		resource_type = alert['normalize']['output']['service'] + ':' + alert['normalize']['output']['resourceType']
 		policy_id = alert['normalize']['output']['vendorPolicy']
-		policy_name = modified_resources[resource_id]['check_name']
 		vendor_id = alert['normalize']['output']['vendorId']
 		alert_id = alert['normalize']['output']['alertId']
+		policy_name = ''
+		
+		for k, v in modified_resources.items():
+			if v['physicalResourceId'] == resource_id:
+				check_index = 0
+				for (check in v['check_id']):
+					if check == policy_id:
+						policy_name == v['check_name'][check_index]
+					check_index += 1
 
 		if 'risk' in alert['general-context']:
 			general_risk = alert['general-context']['risk']['riskValue']
