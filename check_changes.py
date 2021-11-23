@@ -32,17 +32,6 @@ api_request_headers = {
   'x-dassana-cache': 'false'
 }
 
-def stylize_risk(risk):
-	if risk == 'high':
-		risk = 'High :red_circle:'
-	elif risk == 'medium':
-		risk = 'Medium :yellow_circle:'
-	elif risk == 'low':
-		risk = 'Low :white_circle:'
-	else:
-		risk = ' -'
-	return risk
-
 def post_findings_to_github(analysis_table):
 	pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 	headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
@@ -53,10 +42,10 @@ def post_findings_to_github(analysis_table):
 				
 	r = requests.post(url = pr_url, data = dumps(data), headers = headers)
 
-def create_analysis_table(decorated_alerts):
-	print(decorated_alerts)
+def create_analysis_table(decorated_alerts, resources):
 	resources = []
 	types = []
+	policy_names = []
 	policies = []
 	general_risks = []
 	resource_risks = []
@@ -75,20 +64,18 @@ def create_analysis_table(decorated_alerts):
 		resource_id = alert['normalize']['output']['resourceId']
 		resource_type = alert['normalize']['output']['service'] + ':' + alert['normalize']['output']['resourceType']
 		policy_id = alert['normalize']['output']['vendorPolicy']
+		policy_name = resources[resource_id]['check_name']
 		vendor_id = alert['normalize']['output']['vendorId']
 		alert_id = alert['normalize']['output']['alertId']
 
-		if 'risk' in alert['general-context'] and alert['general-context']['risk']['riskValue'] != '':
+		if 'risk' in alert['general-context']:
 			general_risk = alert['general-context']['risk']['riskValue']
-			general_risk = stylize_risk(general_risk)
 		
-		if 'risk' in alert['resource-context'] and alert['resource-context']['risk']['riskValue'] != '':
+		if 'risk' in alert['resource-context']:
 			resource_risk = alert['resource-context']['risk']['riskValue']
-			resource_risk = stylize_risk(resource_risk)
 		
-		if 'risk' in alert['policy-context'] and alert['policy-context']['risk']['riskValue'] != '':
+		if 'risk' in alert['policy-context']:
 			policy_risk = alert['policy-context']['risk']['riskValue']
-			policy_risk = stylize_risk(policy_risk)
 		
 		context_url = f'[View]({base_editor_url}/?alertId={alert_id}&vendorId={vendor_id})'
 
@@ -98,12 +85,13 @@ def create_analysis_table(decorated_alerts):
 		general_risks.append(general_risk)
 		resource_risks.append(resource_risk)
 		policy_risks.append(policy_risk)
-
+		policy_names.append(policy_name)
 		context_urls.append(context_url)
 		
 	changes_df = pd.DataFrame({
 		"Resource": resources,
 		"Type": types,
+		"Policy Name": policy_names,
 		"Policy": policies,
 		"General Risk": general_risk,
 		"Resource Risk": resource_risk,
@@ -174,7 +162,7 @@ def get_modified_resources(change_set):
 					'physicalResourceId': '', 
 					'resourceType': change['ResourceChange']['ResourceType'], 
 					'check_id': [], 
-					'check_name': []
+					'check_name': [],
 				}
 
 			if 'PhysicalResourceId' in change['ResourceChange']:
@@ -238,10 +226,9 @@ def main():
 	alerts = create_alerts(modified_resources)
 	decorated_alerts = decorate_alerts(alerts)
 	
-	analysis_table = create_analysis_table(decorated_alerts)
+	analysis_table = create_analysis_table(decorated_alerts, modified_resources)
 
 	post_findings_to_github(analysis_table)
 
 if __name__ == "__main__":
 	main()
-
