@@ -43,17 +43,49 @@ def stylize_risk(risk):
 		risk = ' -'
 	return risk
 
-def post_findings_to_github(analysis_table):
+def post_findings_to_github(modified_analysis_table, created_analysis_table):
 	pr_url = f"https://api.github.com/repos/{GITHUB_REPO}/issues/{GITHUB_PR}/comments"
 	headers = {'Content-Type': 'application/json', 'Authorization': f'token {GITHUB_TOKEN}'}
 	data_string = f"""<h3>Dassana has detected changes in your tracked CloudFormation template</h3></br>Review the following to avoid service disruptions and/or security risks <hr/></br><details><summary>View Dassana's Change Analysis</summary></br>
 
-{analysis_table}</details>"""
+{modified_analysis_table}</details>
+
+</br><details><summary>View Checkov's analysis of created resources</summary></br>
+
+{created_analysis_table}</details>"""
+
 	data = {'body':data_string}
 				
 	r = requests.post(url = pr_url, data = dumps(data), headers = headers)
 
-def create_analysis_table(decorated_alerts, modified_resources):
+def get_created_analysis_table(created_resources):
+	resources = []
+	types = []
+	policy_names = []
+	policies = []
+
+	for r in created_resources:
+		for i in range(len(created_resources[r]['check_id'])):
+			resources.append(r)
+
+			resource_type = created_resources[r]['resourceType']
+			resource_type = resource_type.split('AWS::')[1]
+
+			types.append(resource_type)
+			policy_names.append(created_resources[r]['check_name'][i])
+			policies.append(created_resources[r]['check_id'][i])
+	
+	changes_df = pd.DataFrame({
+		"Resource": resources,
+		"Type": types,
+		"Policy Name": policy_names,
+		"Policy ID": policies
+	}).set_index("Resource")
+
+	return changes_df.to_markdown()
+
+
+def get_modified_analysis_table(decorated_alerts, modified_resources):
 	resources = []
 	types = []
 	policy_names = []
@@ -154,7 +186,7 @@ def create_alerts(resources):
 	return alerts
 
 
-def add_checkov_results(resources):
+def add_checkov_results(modified_resources, created_resources):
 	checkov_scan = subprocess.Popen(args = ["checkov", "-f", cft_file_name, "--output", "json"], stdout = subprocess.PIPE)
 
 	checkov_results = loads(checkov_scan.communicate()[0])
@@ -163,11 +195,14 @@ def add_checkov_results(resources):
 
 	for check in failed_checks:
 		violating_resource = check['resource'].split('.')[1]
-		if violating_resource in resources:
-			resources[violating_resource]['check_id'].append(check['check_id'])
-			resources[violating_resource]['check_name'].append(check['check_name'])
+		if violating_resource in modified_resources:
+			modified_resources[violating_resource]['check_id'].append(check['check_id'])
+			modified_resources[violating_resource]['check_name'].append(check['check_name'])
+		elif violating_resource in created_resources:
+			created_resources[violating_resource]['check_id'].append(check['check_id'])
+			created_resources[violating_resource]['check_name'].append(check['check_name'])
 
-def get_modified_resources(change_set):
+def get_resources(change_set):
 	modified_resources = {}
 	created_resources = {}
 
@@ -189,9 +224,19 @@ def get_modified_resources(change_set):
 				if 'PhysicalResourceId' in change['ResourceChange']:
 					modified_resources[logical_resource]['physicalResourceId'] = change['ResourceChange']['PhysicalResourceId']
 		else:
-			print(change)
+			logical_resource = change['ResourceChange']['LogicalResourceId']
 
-	return modified_resources
+			if logical_resource in created_resources:
+				created_resources[logical_resource]['changes'].append(change)	
+			else:
+				created_resources[logical_resource] = {
+						'changes': [change], 
+						'resourceType': change['ResourceChange']['ResourceType'], 
+						'check_id': [], 
+						'check_name': [],
+					}
+
+	return modified_resources, created_resources
 
 def create_change_set():
 	"""
@@ -242,15 +287,16 @@ def main():
 	
 	change_set = create_change_set()
 	
-	modified_resources = get_modified_resources(change_set)
-	add_checkov_results(modified_resources)
-
+	modified_resources, created_resources = get_resources(change_set)
+	add_checkov_results(modified_resources, created_resources)
+	print(created_resources)
 	alerts = create_alerts(modified_resources)
 	decorated_alerts = decorate_alerts(alerts)
 	
-	analysis_table = create_analysis_table(decorated_alerts, modified_resources)
-
-	post_findings_to_github(analysis_table)
+	modified_analysis_table = get_modified_analysis_table(decorated_alerts, modified_resources)
+	created_analysis_table = get_created_analysis_table(created_resources)
+	print(created_analysis_table)
+	post_findings_to_github(modified_analysis_table, created_analysis_table)
 
 if __name__ == "__main__":
 	main()
