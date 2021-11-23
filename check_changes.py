@@ -70,7 +70,7 @@ def create_analysis_table(decorated_alerts, modified_resources):
 		for k, v in modified_resources.items():
 			if v['physicalResourceId'] == resource_id:
 				check_index = 0
-				for (check in v['check_id']):
+				for check in v['check_id']:
 					if check == policy_id:
 						policy_name == v['check_name'][check_index]
 					check_index += 1
