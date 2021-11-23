@@ -189,7 +189,17 @@ def get_modified_resources(change_set):
 				if 'PhysicalResourceId' in change['ResourceChange']:
 					modified_resources[logical_resource]['physicalResourceId'] = change['ResourceChange']['PhysicalResourceId']
 		else:
-			print(change)
+			logical_resource = change['ResourceChange']['LogicalResourceId']
+
+			if logical_resource in created_resources:
+				created_resources[logical_resource]['changes'].append(change)	
+			else:
+				created_resources[logical_resource] = {
+						'changes': [change], 
+						'resourceType': change['ResourceChange']['ResourceType'], 
+						'check_id': [], 
+						'check_name': [],
+					}
 
 	return modified_resources
 
