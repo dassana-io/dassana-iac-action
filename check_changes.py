@@ -220,7 +220,7 @@ def main():
 	change_set = create_change_set()
 	
 	modified_resources = get_modified_resources(change_set)
-
+	print(modified_resources)
 	add_checkov_results(modified_resources)
 
 	alerts = create_alerts(modified_resources)
