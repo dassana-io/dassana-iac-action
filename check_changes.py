@@ -14,13 +14,13 @@ GITHUB_SHA = os.environ['GITHUB_SHA']
 GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
 GITHUB_PR = os.environ['GITHUB_PR']
 
-API_GATEWAY_ENDPOINT = 'https://yzl8a8ro0a.execute-api.us-east-2.amazonaws.com/v1'
-API_KEY = 'rAS4YiYW6s4CyO2h8OJD13RtsiTcRfnB78RZfs6T'
+API_GATEWAY_ENDPOINT = os.environ['API_GATEWAY_ENDPOINT']
+API_KEY = os.environ['API_KEY']
 
-aws_region = 'us-west-2'
-s3_bucket_name = 'cft-gh'
-cf_stack_name = 'boss-test'
-cft_file_name = 'template.yaml'
+aws_region = os.environ['INPUT_AWS_REGION']
+s3_bucket_name = os.environ['INPUT_BUCKET_NAME']
+cf_stack_name = os.environ['INPUT_STACK_NAME']
+cft_file_name = os.environ['INPUT_TEMPLATE_FILE']
 
 api_request_headers = {
   'Accept': 'application/json, text/plain, */*',
@@ -184,7 +184,6 @@ def create_alerts(resources):
 			alerts.append(dumps(alert))
 	
 	return alerts
-
 
 def add_checkov_results(modified_resources, created_resources):
 	checkov_scan = subprocess.Popen(args = ["checkov", "-f", cft_file_name, "--output", "json"], stdout = subprocess.PIPE)
