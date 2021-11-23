@@ -63,7 +63,8 @@ def create_analysis_table(decorated_alerts, modified_resources):
 	policy_risks = []
 	context_urls = []
 
-	base_editor_url = 'https://deploy-preview-146--dassana-web-authoring.netlify.app'
+	base_editor_url = 'https://editor.dassana.io'
+
 	for alert in decorated_alerts:
 		alert = alert['dassana']
 
@@ -167,29 +168,30 @@ def add_checkov_results(resources):
 			resources[violating_resource]['check_name'].append(check['check_name'])
 
 def get_modified_resources(change_set):
-	resources = {}
+	modified_resources = {}
+	created_resources = {}
 
 	for change in change_set['Changes']:
-		if change['ResourceChange']['Action'] != 'Modify':
-			continue
+		if change['ResourceChange']['Action'] == 'Modify':
+			logical_resource = change['ResourceChange']['LogicalResourceId']
 
-		logical_resource = change['ResourceChange']['LogicalResourceId']
+			if logical_resource in modified_resources:
+				modified_resources[logical_resource]['changes'].append(change)	
+			else:
+				modified_resources[logical_resource] = {
+						'changes': [change], 
+						'physicalResourceId': '', 
+						'resourceType': change['ResourceChange']['ResourceType'], 
+						'check_id': [], 
+						'check_name': [],
+					}
 
-		if logical_resource in resources:
-			resources[logical_resource]['changes'].append(change)	
+				if 'PhysicalResourceId' in change['ResourceChange']:
+					modified_resources[logical_resource]['physicalResourceId'] = change['ResourceChange']['PhysicalResourceId']
 		else:
-			resources[logical_resource] = {
-					'changes': [change], 
-					'physicalResourceId': '', 
-					'resourceType': change['ResourceChange']['ResourceType'], 
-					'check_id': [], 
-					'check_name': [],
-				}
+			print(change)
 
-			if 'PhysicalResourceId' in change['ResourceChange']:
-				resources[logical_resource]['physicalResourceId'] = change['ResourceChange']['PhysicalResourceId']
-
-	return resources
+	return modified_resources
 
 def create_change_set():
 	"""
@@ -241,7 +243,6 @@ def main():
 	change_set = create_change_set()
 	
 	modified_resources = get_modified_resources(change_set)
-	print(modified_resources)
 	add_checkov_results(modified_resources)
 
 	alerts = create_alerts(modified_resources)
