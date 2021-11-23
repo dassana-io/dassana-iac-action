@@ -53,17 +53,17 @@ def post_findings_to_github(analysis_table):
 				
 	r = requests.post(url = pr_url, data = dumps(data), headers = headers)
 
-def create_analysis_table(decorated_alerts):
-	print(decorated_alerts)
+def create_analysis_table(decorated_alerts, modified_resources):
 	resources = []
 	types = []
+	policy_names = []
 	policies = []
 	general_risks = []
 	resource_risks = []
 	policy_risks = []
 	context_urls = []
 
-	base_editor_url = 'https://deploy-preview-146--dassana-web-authoring.netlify.app'
+	base_editor_url = 'https://editor.dassana.io'
 
 	for alert in decorated_alerts:
 		alert = alert['dassana']
@@ -77,19 +77,28 @@ def create_analysis_table(decorated_alerts):
 		policy_id = alert['normalize']['output']['vendorPolicy']
 		vendor_id = alert['normalize']['output']['vendorId']
 		alert_id = alert['normalize']['output']['alertId']
-
-		if 'risk' in alert['general-context'] and alert['general-context']['risk']['riskValue'] != '':
-			general_risk = alert['general-context']['risk']['riskValue']
-			general_risk = stylize_risk(general_risk)
+		policy_name = ''
 		
-		if 'risk' in alert['resource-context'] and alert['resource-context']['risk']['riskValue'] != '':
+		for k, v in modified_resources.items():
+			if v['physicalResourceId'] == resource_id:
+				check_index = 0
+				for check in v['check_id']:
+					if check == policy_id:
+						policy_name = v['check_name'][check_index]
+					check_index += 1
+
+		if 'risk' in alert['general-context']:
+			general_risk = alert['general-context']['risk']['riskValue']
+			general_risk = stylize_risk(stylize_risk)
+		
+		if 'risk' in alert['resource-context']:
 			resource_risk = alert['resource-context']['risk']['riskValue']
 			resource_risk = stylize_risk(resource_risk)
 		
-		if 'risk' in alert['policy-context'] and alert['policy-context']['risk']['riskValue'] != '':
+		if 'risk' in alert['policy-context']:
 			policy_risk = alert['policy-context']['risk']['riskValue']
 			policy_risk = stylize_risk(policy_risk)
-		
+
 		context_url = f'[View]({base_editor_url}/?alertId={alert_id}&vendorId={vendor_id})'
 
 		resources.append(resource_id)
@@ -98,13 +107,14 @@ def create_analysis_table(decorated_alerts):
 		general_risks.append(general_risk)
 		resource_risks.append(resource_risk)
 		policy_risks.append(policy_risk)
-
+		policy_names.append(policy_name)
 		context_urls.append(context_url)
 		
 	changes_df = pd.DataFrame({
 		"Resource": resources,
 		"Type": types,
-		"Policy": policies,
+		"Policy Name": policy_names,
+		"Policy ID": policies,
 		"General Risk": general_risk,
 		"Resource Risk": resource_risk,
 		"Policy Risk": policy_risk,
@@ -158,29 +168,30 @@ def add_checkov_results(resources):
 			resources[violating_resource]['check_name'].append(check['check_name'])
 
 def get_modified_resources(change_set):
-	resources = {}
+	modified_resources = {}
+	created_resources = {}
 
 	for change in change_set['Changes']:
-		if change['ResourceChange']['Action'] != 'Modify':
-			continue
+		if change['ResourceChange']['Action'] == 'Modify':
+			logical_resource = change['ResourceChange']['LogicalResourceId']
 
-		logical_resource = change['ResourceChange']['LogicalResourceId']
+			if logical_resource in modified_resources:
+				modified_resources[logical_resource]['changes'].append(change)	
+			else:
+				modified_resources[logical_resource] = {
+						'changes': [change], 
+						'physicalResourceId': '', 
+						'resourceType': change['ResourceChange']['ResourceType'], 
+						'check_id': [], 
+						'check_name': [],
+					}
 
-		if logical_resource in resources:
-			resources[logical_resource]['changes'].append(change)	
+				if 'PhysicalResourceId' in change['ResourceChange']:
+					modified_resources[logical_resource]['physicalResourceId'] = change['ResourceChange']['PhysicalResourceId']
 		else:
-			resources[logical_resource] = {
-					'changes': [change], 
-					'physicalResourceId': '', 
-					'resourceType': change['ResourceChange']['ResourceType'], 
-					'check_id': [], 
-					'check_name': []
-				}
+			print(change)
 
-			if 'PhysicalResourceId' in change['ResourceChange']:
-				resources[logical_resource]['physicalResourceId'] = change['ResourceChange']['PhysicalResourceId']
-
-	return resources
+	return modified_resources
 
 def create_change_set():
 	"""
@@ -232,16 +243,14 @@ def main():
 	change_set = create_change_set()
 	
 	modified_resources = get_modified_resources(change_set)
-
 	add_checkov_results(modified_resources)
 
 	alerts = create_alerts(modified_resources)
 	decorated_alerts = decorate_alerts(alerts)
 	
-	analysis_table = create_analysis_table(decorated_alerts)
+	analysis_table = create_analysis_table(decorated_alerts, modified_resources)
 
 	post_findings_to_github(analysis_table)
 
 if __name__ == "__main__":
 	main()
-
