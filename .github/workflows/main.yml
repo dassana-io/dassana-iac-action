@@ -20,7 +20,7 @@ jobs:
           aws_region: 'us-west-2'
           bucket_name: 'cft-gh'
           stack_name: 'boss-test'
-          template_file: '/nested/template.yaml'
+          template_file: './nested/template.yaml'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_PR: ${{ github.event.number }}
