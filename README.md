@@ -21,7 +21,7 @@ jobs:
         with: 
           python-version: 3.8
       - name: Run Dassana IaC Action
-        uses: kloading/CloudContext@main
+        uses: dassana-io/CloudContext@main
         with:
           aws_region: 'us-west-2'
           bucket_name: 'cft-bucket'
