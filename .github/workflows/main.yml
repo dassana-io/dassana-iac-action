@@ -21,12 +21,10 @@ jobs:
           bucket_name: 'cft-gh'
           stack_name: 'boss-test'
           template_file: './cloudformation/template.yaml'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_PR: ${{ github.event.number }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          API_GATEWAY_ENDPOINT: ${{ secrets.API_GATEWAY_ENDPOINT }}
-          API_KEY: ${{ secrets.API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          api_gateway_endpoint: ${{ secrets.API_GATEWAY_ENDPOINT }}
+          api_key: ${{ secrets.API_KEY }}
 
           
