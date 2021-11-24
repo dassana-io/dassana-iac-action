@@ -24,11 +24,6 @@ jobs:
         uses: dassana-io/CloudContext@main
         with:
           aws_region: 'us-west-2'
-          bucket_name: 'cft-bucket'
-          stack_name: 'test-stack'
-          template_file: './cloudformation/template.yaml'
-        env:
-          aws_region: 'us-west-2'
           bucket_name: 'cft-gh'
           stack_name: 'boss-test'
           template_file: './cloudformation/template.yaml'
