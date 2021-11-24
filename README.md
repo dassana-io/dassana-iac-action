@@ -6,7 +6,7 @@ Supercharge your DevSecOps teams using [Dassana](https://github.com/dassana-io/d
 on: 
   pull_request:
     paths:
-      - 'template.yaml'
+      - 'cloudformation/template.yaml'
 
 jobs:
   dassana-job:
