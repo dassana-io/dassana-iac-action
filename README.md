@@ -1,6 +1,6 @@
 # Dassana IaC
 Supercharge your DevSecOps teams using [Dassana](https://github.com/dassana-io/dassana) to get to production faster.</br><hr/>
-Get started with 1-click </br></br>[![](https://cdn.rawgit.com/buildkite/cloudformation-launch-stack-button-svg/master/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=buildkite&templateURL=https://s3.amazonaws.com/my-great-stack.json)
+Get started with 1-click </br></br>[![](https://cdn.rawgit.com/buildkite/cloudformation-launch-stack-button-svg/master/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://dassana-iac-prod-public.s3.amazonaws.com/deploy.yaml&stackName=Dassana-IaC-Action)
 
 ## Example usage
 ```yaml
