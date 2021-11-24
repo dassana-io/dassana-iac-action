@@ -25,7 +25,7 @@ jobs:
           aws_region: 'us-west-2'
           bucket_name: 'cft-bucket'
           stack_name: 'test-stack'
-          template_file: 'template.yaml'
+          template_file: './cloudformation/template.yaml'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_PR: ${{ github.event.number }}
