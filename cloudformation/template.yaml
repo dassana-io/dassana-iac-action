@@ -1,4 +1,3 @@
-# Deploys a single S3 Bucket
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Resources:
