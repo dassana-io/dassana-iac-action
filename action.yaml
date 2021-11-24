@@ -15,6 +15,18 @@ inputs:
   template_file:
     description: 'Path to CFT file'
     required: true
+  aws_access_key_id:
+    description: 'Access Key ID for user created by CFT'
+    required: true
+  aws_secret_access_key:
+    description: 'Secret Access Key for user created by CFT'
+    required: true
+  api_gateway_endpoint:
+    description: 'Dassana API endpoint url'
+    required: true
+  api_key:
+    description: 'Dassana API endpoint key'
+    required: true
     
 branding:
   icon: 'arrow-left'
@@ -41,8 +53,14 @@ runs:
         run: |
           python ./check_changes.py
         env:
+          GITHUB_PR: ${{ github.event.number }}
+          GITHUB_TOKEN: ${{ inputs.github_token }}
           INPUT_AWS_REGION: ${{ inputs.aws_region }}
           INPUT_BUCKET_NAME: ${{ inputs.bucket_name }}
           INPUT_STACK_NAME : ${{ inputs.stack_name }}
           INPUT_TEMPLATE_FILE : ${{ inputs.template_file }}
+          AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+          API_GATEWAY_ENDPOINT: ${{ inputs.api_gateway_endpoint }}
+          API_KEY: ${{ inputs.api_key }}
         
