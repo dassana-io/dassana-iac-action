@@ -8,6 +8,7 @@ import uuid
 import pandas as pd
 
 from json import dumps, loads
+from botocore.exceptions import ClientError
 
 GITHUB_REPO = os.environ['GITHUB_REPOSITORY']
 GITHUB_SHA = os.environ['GITHUB_SHA']
