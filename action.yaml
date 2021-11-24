@@ -3,6 +3,9 @@ name: 'Dassana IaC GitHub Action'
 author: 'Dassana'
 description: 'Supercharge your IaC checks to get to production faster'
 inputs:
+  github_token:
+    description: 'Github PAT'
+    required: true
   aws_region:
     description: 'Region cloudformation stack is deployed in'
     required: true
