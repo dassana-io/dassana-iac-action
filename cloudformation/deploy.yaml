@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  DassanaCFTBucket:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+  
+  DassanaIaCUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: !Join ["", [{ "Ref": "AWS::StackName" }, "-DassanaIaCUser"]]
+      Policies:
+        - PolicyName: DassanaIaCPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource:
+                  - !Sub arn:aws:s3:::${DassanaCFTBucket}/*
+                  - !Sub arn:aws:s3:::${DassanaCFTBucket}
+              - Effect: Allow
+                Action:
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:CreateChangeSet
+                Resource: "*"
